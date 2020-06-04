@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import java.util.LinkedList;
 import java.util.List;
 
-public class DBController extends SQLiteOpenHelper {
+class DBController extends SQLiteOpenHelper {
 
     DBController(Context context) {
         super(context, "notes.db", null, 1);
@@ -70,7 +70,7 @@ public class DBController extends SQLiteOpenHelper {
         return students;
     }
 
-    public Note selectNote(int id) {
+     Note selectNote(int id) {
         Note note = new Note();
         SQLiteDatabase db = getReadableDatabase();
         String[] columns={"idNote","title", "noteDate", "notePath", "imagePath"};
@@ -86,6 +86,14 @@ public class DBController extends SQLiteOpenHelper {
             cursor.close();
         }
         return note;
+    }
+
+     void removeNote(Note note) {
+        SQLiteDatabase db = getWritableDatabase();
+        String table = "note";
+        String whereClause = "idNote=?";
+        String[] whereArgs = new String[] { String.valueOf(note.getNoteId()) };
+        db.delete(table, whereClause, whereArgs);
     }
 
 

@@ -28,15 +28,16 @@ public class NoteActivity extends AppCompatActivity {
 
     // Storage Permissions
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
+    private static final String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
-    DBController controller;
-    int noteId;
-    EditText titleEditText, dataEditText;
-    TextView dateTextView;
-    Note note;
+    private DBController controller;
+    private int noteId;
+    private EditText titleEditText;
+    private EditText dataEditText;
+    private TextView dateTextView;
+    private Note note;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +62,7 @@ public class NoteActivity extends AppCompatActivity {
 
     public void saveButtonClick(View view) {
         if (!verifyStoragePermissions(this)) {
+            Toast.makeText(this, "Spróbuj ponownie", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -72,7 +74,7 @@ public class NoteActivity extends AppCompatActivity {
         String date = dateFormat.format(aDate);
 
 
-        String fileName = date.toString();
+        String fileName = date;
         fileName = fileName.replaceAll(" ", "_").toLowerCase();
         fileName = fileName + ".txt";
 
@@ -86,11 +88,11 @@ public class NoteActivity extends AppCompatActivity {
 
         FileOutputStream fOut;
         try {
-            fOut = openFileOutput(fileName, MODE_PRIVATE); // ustanowienie strumienia zapisu
+            fOut = openFileOutput(fileName, MODE_PRIVATE);
 
-            fOut.write(note.getBytes()); // zapis wymaga obsługi wyjątku, tą obsługę można wygenerować za pomocą środowiska
+            fOut.write(note.getBytes());
 
-            fOut.close(); // zamknięcie procesu - WAŻNE, nie ignorować
+            fOut.close();
             Toast.makeText(this, "Zapisano w:" + getFilesDir() + "/" + fileName, Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
@@ -102,7 +104,7 @@ public class NoteActivity extends AppCompatActivity {
     }
 
 
-    public static boolean verifyStoragePermissions(Activity activity) {
+    private static boolean verifyStoragePermissions(Activity activity) {
         // Check if we have write permission
         int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
@@ -118,7 +120,7 @@ public class NoteActivity extends AppCompatActivity {
         return true;
     }
 
-    public void loadFile() {
+    private void loadFile() {
         try {
             FileInputStream fIn = openFileInput(note.getNotePath());
             InputStreamReader inStreamReader = new InputStreamReader(fIn);
