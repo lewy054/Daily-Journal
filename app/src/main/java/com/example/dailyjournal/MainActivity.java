@@ -221,15 +221,12 @@ public class MainActivity extends AppCompatActivity {
             File f0 = new File(dir, note.getNotePath());
             boolean d0 = f0.delete();
 
-            //delete image
-            //TODO
-
             //delete from database
             controller.removeNote(note);
         }
         floatingActionButton.setImageResource(R.drawable.ic_add_black);
         Toast.makeText(this, "Wpisy usunięte", Toast.LENGTH_SHORT).show();
-
+        checkCount = 0;
         onRestart();
     }
 

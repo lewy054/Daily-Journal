@@ -13,18 +13,18 @@
         android:name="editText"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:backgroundTint="@color/colorAccent"
+        android:gravity="center"
+        android:hint="@string/title"
         android:importantForAutofill="no"
         android:inputType="text"
         android:maxLength="25"
+        android:textAlignment="center"
         android:textColor="@color/colorWhite"
-        android:backgroundTint="@color/colorAccent"
+        android:textColorHint="@color/colorGray"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:hint="@string/title"
-        android:textColorHint="@color/colorGray"
-        android:textAlignment="center"
-        android:gravity="center"
         tools:ignore="LabelFor" />
 
     <TextView
@@ -35,6 +35,7 @@
         android:textColor="@android:color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/titleEditText" />
+
 
     <ScrollView
         android:id="@+id/scroller"
@@ -47,15 +48,37 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/dateTextView">
 
-        <EditText
-            android:id="@+id/dataEditText"
-            android:name="editText"
+        <LinearLayout
+            android:id="@+id/linearLayout2"
             android:layout_width="fill_parent"
-            android:layout_height="0dp"
-            android:importantForAutofill="no"
-            android:inputType="textMultiLine"
-            android:textColor="@color/colorWhite"
-            tools:ignore="LabelFor" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <LinearLayout
+                android:id="@+id/imageLayout"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/colorAccent"/>
+
+            <EditText
+                android:id="@+id/dataEditText"
+                android:name="editText"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:importantForAutofill="no"
+                android:inputType="textMultiLine"
+                android:textColor="@color/colorWhite"
+                tools:ignore="LabelFor" />
+        </LinearLayout>
     </ScrollView>
 
     <LinearLayout
