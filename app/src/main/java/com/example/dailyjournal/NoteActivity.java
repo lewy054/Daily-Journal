@@ -6,21 +6,17 @@ import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Camera;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -72,7 +68,7 @@ public class NoteActivity extends AppCompatActivity {
         titleEditText = findViewById(R.id.titleEditText);
         dateTextView = findViewById(R.id.dateTextView);
         imageLayout = findViewById(R.id.imageLayout);
-
+        dateTextView.setVisibility(View.GONE);
         dataEditText.setText("");
         titleEditText.setText("");
         dateTextView.setText("");
@@ -81,7 +77,6 @@ public class NoteActivity extends AppCompatActivity {
         controller = new DBController(this);
         dimension = convertDpToPixel(300);
 
-        verifyStoragePermissions(this);
 
         noteId = MainActivity.noteId;
 
@@ -110,86 +105,88 @@ public class NoteActivity extends AppCompatActivity {
 
     public void saveButtonClick(View view) {
         if (!verifyStoragePermissions(this)) {
-            Toast.makeText(this, "Spróbuj ponownie", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        String date = "";
-        if (noteId != 0) {
-            date = note.getNoteDate();
-            deleteFile();
-        }
-        else{
-            DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-            Date aDate = new Date();
-            date = dateFormat.format(aDate);
-        }
-
-        String noteText = dataEditText.getText().toString();
-
-        String fileName = date;
-        fileName = fileName.replaceAll(" ", "_").toLowerCase();
-        fileName = fileName + ".txt";
-
-        //String dirName = Environment.getExternalStorageDirectory() + "/" + R.string.app_name + "/";
-        String dirName = Environment.getExternalStorageDirectory() + "/DailyJournal/";
-        File myDir = new File(dirName);
-        /*if directory doesn't exist, create it*/
-        if (!myDir.exists()) {
-            myDir.mkdirs();
-        }
-
-        FileOutputStream fOut;
-        try {
-            fOut = openFileOutput(fileName, MODE_PRIVATE);
-            fOut.write(noteText.getBytes());
-            fOut.close();
-            Toast.makeText(this, "Zapisano", Toast.LENGTH_SHORT).show();
-        } catch (IOException e) {
-            Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
-
-        Bitmap imagePath = null;
-        if (noteId != 0){
-            if (imageView != null) {
-                BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
-                imagePath = drawable.getBitmap();
-                controller.updateNote(noteId,titleEditText.getText().toString(), date, fileName, true, imagePath);
+            Toast.makeText(this, "Spróbuj ponownie", Toast.LENGTH_LONG).show();
+        } else {
+            String date = "";
+            if (noteId != 0) {
+                date = note.getNoteDate();
+                deleteFile();
             } else {
-                controller.updateNote(noteId,titleEditText.getText().toString(), date, fileName, false);
+                DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+                Date aDate = new Date();
+                date = dateFormat.format(aDate);
             }
-        }
-        else {
-            if (imageView != null) {
-                BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
-                imagePath = drawable.getBitmap();
-                controller.addNote(new Note(titleEditText.getText().toString(), date, fileName, imagePath, true));
+
+            String noteText = dataEditText.getText().toString();
+
+            String fileName = date;
+            fileName = fileName.replaceAll(" ", "_").toLowerCase();
+            fileName = fileName + ".txt";
+
+            //String dirName = Environment.getExternalStorageDirectory() + "/" + R.string.app_name + "/";
+            String dirName = Environment.getExternalStorageDirectory() + "/DailyJournal/";
+            File myDir = new File(dirName);
+            /*if directory doesn't exist, create it*/
+            if (!myDir.exists()) {
+                myDir.mkdirs();
+            }
+
+            FileOutputStream fOut;
+            try {
+                fOut = openFileOutput(fileName, MODE_PRIVATE);
+                fOut.write(noteText.getBytes());
+                fOut.close();
+                Toast.makeText(this, "Zapisano", Toast.LENGTH_SHORT).show();
+            } catch (IOException e) {
+                Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            }
+
+            Bitmap imagePath = null;
+            if (noteId != 0) {
+                if (imageView != null) {
+                    BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
+                    imagePath = drawable.getBitmap();
+                    controller.updateNote(noteId, titleEditText.getText().toString(), date, fileName, true, imagePath);
+                } else {
+                    controller.updateNote(noteId, titleEditText.getText().toString(), date, fileName, false);
+                }
             } else {
-                controller.addNote(new Note(titleEditText.getText().toString(), date, fileName, false));
+                if (imageView != null) {
+                    BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
+                    imagePath = drawable.getBitmap();
+                    controller.addNote(new Note(titleEditText.getText().toString(), date, fileName, imagePath, true));
+                } else {
+                    controller.addNote(new Note(titleEditText.getText().toString(), date, fileName, false));
+                }
             }
         }
     }
 
     private void loadFile() {
-        try {
-            FileInputStream fIn = openFileInput(note.getNotePath());
-            InputStreamReader inStreamReader = new InputStreamReader(fIn);
-            BufferedReader bufReader = new BufferedReader(inStreamReader);
-            StringBuilder sb = new StringBuilder();
-            String line;
+        if (!verifyStoragePermissions(this)) {
+            Toast.makeText(this, "Spróbuj ponownie", Toast.LENGTH_LONG).show();
+        } else {
+            try {
+                FileInputStream fIn = openFileInput(note.getNotePath());
+                InputStreamReader inStreamReader = new InputStreamReader(fIn);
+                BufferedReader bufReader = new BufferedReader(inStreamReader);
+                StringBuilder sb = new StringBuilder();
+                String line;
 
-            while ((line = bufReader.readLine()) != null) {
-                sb.append(line).append("\n");
+                while ((line = bufReader.readLine()) != null) {
+                    sb.append(line).append("\n");
+                }
+                dataEditText.setText(sb.toString());
+
+                bufReader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            dataEditText.setText(sb.toString());
-
-            bufReader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            titleEditText.setText(note.getTitle());
+            dateTextView.setText(note.getNoteDate());
+            dateTextView.setVisibility(View.VISIBLE);
         }
-        titleEditText.setText(note.getTitle());
-        dateTextView.setText(note.getNoteDate());
-
     }
 
 
@@ -216,10 +213,7 @@ public class NoteActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Wybierz zdjęcie"), GALLERY_REQUEST);
+                getPhoto();
             }
         });
 
@@ -251,7 +245,7 @@ public class NoteActivity extends AppCompatActivity {
                 imageView.setLayoutParams(params);
 
             } catch (Exception ex) {
-                Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG).show();
             }
 
         } else if (requestCode == GALLERY_REQUEST && resultCode == RESULT_OK) {
@@ -262,21 +256,35 @@ public class NoteActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(dimension, dimension);
                 imageView.setLayoutParams(params);
             } catch (Exception ex) {
-                Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG).show();
             }
         }
-        imageLayout.removeAllViews();
-        imageLayout.addView(imageView);
+        if (imageView.getDrawable() != null) {
+            imageLayout.removeAllViews();
+            imageLayout.addView(imageView);
+        }
     }
 
     private void makePhoto() {
-        if (!verifyCameraPermissions(this)) {
-            Toast.makeText(this, "Spróbuj ponownie", Toast.LENGTH_SHORT).show();
-            return;
+        if (!verifyCameraPermissions(this) || !verifyStoragePermissions(this)) {
+            Toast.makeText(this, "Spróbuj ponownie", Toast.LENGTH_LONG).show();
+        } else {
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            if (intent.resolveActivity(getPackageManager()) != null) {
+                startActivityForResult(intent, CAMERA_REQUEST);
+            }
         }
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(intent, CAMERA_REQUEST);
+    }
+
+    private void getPhoto() {
+        if (!verifyStoragePermissions(this)) {
+            Toast.makeText(this, "Spróbuj ponownie", Toast.LENGTH_LONG).show();
+
+        } else {
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent, "Wybierz zdjęcie"), GALLERY_REQUEST);
         }
     }
 
@@ -307,19 +315,15 @@ public class NoteActivity extends AppCompatActivity {
         alert.show();
     }
 
-    private void deleteImage(){
+    private void deleteImage() {
         imageLayout.removeAllViews();
         createButtonsForImages();
     }
 
-    private void deleteFile(){
+    private void deleteFile() {
         String dir = getFilesDir().getAbsolutePath();
         File f0 = new File(dir, note.getNotePath());
         boolean d0 = f0.delete();
-    }
-
-    private void saveNote(){
-
     }
 
 

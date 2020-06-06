@@ -26,7 +26,11 @@ import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,19 +91,24 @@ public class MainActivity extends AppCompatActivity {
         final TextView textView = new TextView(this);
         textView.setSingleLine(false);
         int titleSize = 24;
+        int dataSize = 17;
         int dateSize = 13;
 
 
         String title = note.getTitle();
+        String data = loadFile(note.getNotePath());
         String date = note.getNoteDate();
 
         SpannableString span1 = new SpannableString(title);
         span1.setSpan(new AbsoluteSizeSpan(convertDpToPixel(titleSize)), 0, title.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
 
-        SpannableString span2 = new SpannableString(date);
-        span2.setSpan(new AbsoluteSizeSpan(convertDpToPixel(dateSize)), 0, date.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+        SpannableString span2 = new SpannableString(data);
+        span2.setSpan(new AbsoluteSizeSpan(convertDpToPixel(dataSize)), 0, data.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
 
-        CharSequence finalText = TextUtils.concat(span1, "\n", span2);
+        SpannableString span3 = new SpannableString(date);
+        span3.setSpan(new AbsoluteSizeSpan(convertDpToPixel(dateSize)), 0, date.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+
+        CharSequence finalText = TextUtils.concat(span1, "\n", span2, "\n", span3);
         textView.setText(finalText);
 
         textView.setTextColor(Color.WHITE);
@@ -228,6 +237,29 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "Wpisy usunięte", Toast.LENGTH_SHORT).show();
         checkCount = 0;
         onRestart();
+    }
+
+    public String loadFile(String notePath) {
+        String line = "";
+        try {
+            FileInputStream fIn = openFileInput(notePath);
+            InputStreamReader inStreamReader = new InputStreamReader(fIn);
+            BufferedReader bufReader = new BufferedReader(inStreamReader);
+            int textMax = 150;
+            line = bufReader.readLine();
+            if (line != null && line.length() > textMax) {
+                line = line.substring(0, textMax) + "...";
+            } else if (line == null) {
+                line = "";
+            }
+            bufReader.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return line;
+
+
     }
 
 
