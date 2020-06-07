@@ -2,4 +2,14 @@
     <string name="app_name">Daily Journal</string>
     <string name="save">Zapisz</string>
     <string name="title">Tytuł notatki</string>
+    <string name="makePhoto">Zrób zdjęcie</string>
+    <string name="addPhoto">Dodaj zdjęcie</string>
+    <string name="confirm">Potwierdź</string>
+    <string name="deleteNotesConfirm">Czy jesteś pewny, że chcesz usunąć zaznaczone notatki?</string>
+    <string name="notesDeleted">Wpisy usunięte</string>
+    <string name="Saved">Zapisano</string>
+    <string name="tryAgain">Spróbuj ponownie</string>
+    <string name="selectPhoto">Wybierz zdjęcie</string>
+    <string name="emptyTitle">Tytuł nie może być pusty!</string>
+    <string name="deleteImageConfirm">Czy jesteś pewny, że chcesz usunąć dodane zdjęcie?</string>
 </resources>

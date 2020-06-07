@@ -3,6 +3,7 @@ package com.example.dailyjournal;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.Activity;
@@ -39,12 +40,6 @@ import java.util.Date;
 
 public class NoteActivity extends AppCompatActivity {
 
-    // Storage Permissions
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static final String[] PERMISSIONS_STORAGE = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-    };
     //Camera Permissions
     private static final int CAMERA_REQUEST = 1888;
     private static final int GALLERY_REQUEST = 1889;
@@ -104,89 +99,90 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     public void saveButtonClick(View view) {
-        if (!verifyStoragePermissions(this)) {
-            Toast.makeText(this, "Spróbuj ponownie", Toast.LENGTH_LONG).show();
+        String title = titleEditText.getText().toString();
+        String date;
+        if(title.equals("") || title.equals(null)){
+            Toast.makeText(this, R.string.emptyTitle, Toast.LENGTH_LONG).show();
+        }
+        if (noteId != 0) {
+            date = note.getNoteDate();
+            deleteFile();
         } else {
-            String date = "";
-            if (noteId != 0) {
-                date = note.getNoteDate();
-                deleteFile();
+            DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+            Date aDate = new Date();
+            date = dateFormat.format(aDate);
+        }
+
+        String noteText = dataEditText.getText().toString();
+
+        String fileName = date;
+        fileName = fileName.replaceAll(" ", "_").toLowerCase();
+        fileName = fileName + ".txt";
+
+        //String dirName = Environment.getExternalStorageDirectory() + "/" + R.string.app_name + "/";
+        String dirName = Environment.getExternalStorageDirectory() + "/DailyJournal/";
+        File myDir = new File(dirName);
+        /*if directory doesn't exist, create it*/
+        if (!myDir.exists()) {
+            myDir.mkdirs();
+        }
+
+        FileOutputStream fOut;
+        try {
+            fOut = openFileOutput(fileName, MODE_PRIVATE);
+            fOut.write(noteText.getBytes());
+            fOut.close();
+            Toast.makeText(this, R.string.Saved, Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
+
+        Bitmap imagePath;
+        if (noteId != 0) {
+            //user edited note so update it
+            if (note.isHaveImage()) {
+                BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
+                imagePath = drawable.getBitmap();
+                note.setImagePath(imagePath);
+            }
+            note.setTitle(titleEditText.getText().toString());
+            note.setNoteDate(date);
+            note.setNotePath(fileName);
+            controller.updateNote(note);
+        } else {
+            //create new note
+            if (imageView != null) {
+                BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
+                imagePath = drawable.getBitmap();
+                controller.addNote(new Note(title, date, fileName, imagePath, true));
             } else {
-                DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-                Date aDate = new Date();
-                date = dateFormat.format(aDate);
-            }
-
-            String noteText = dataEditText.getText().toString();
-
-            String fileName = date;
-            fileName = fileName.replaceAll(" ", "_").toLowerCase();
-            fileName = fileName + ".txt";
-
-            //String dirName = Environment.getExternalStorageDirectory() + "/" + R.string.app_name + "/";
-            String dirName = Environment.getExternalStorageDirectory() + "/DailyJournal/";
-            File myDir = new File(dirName);
-            /*if directory doesn't exist, create it*/
-            if (!myDir.exists()) {
-                myDir.mkdirs();
-            }
-
-            FileOutputStream fOut;
-            try {
-                fOut = openFileOutput(fileName, MODE_PRIVATE);
-                fOut.write(noteText.getBytes());
-                fOut.close();
-                Toast.makeText(this, "Zapisano", Toast.LENGTH_SHORT).show();
-            } catch (IOException e) {
-                Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
-                e.printStackTrace();
-            }
-
-            Bitmap imagePath = null;
-            if (noteId != 0) {
-                if (imageView != null) {
-                    BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
-                    imagePath = drawable.getBitmap();
-                    controller.updateNote(noteId, titleEditText.getText().toString(), date, fileName, true, imagePath);
-                } else {
-                    controller.updateNote(noteId, titleEditText.getText().toString(), date, fileName, false);
-                }
-            } else {
-                if (imageView != null) {
-                    BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
-                    imagePath = drawable.getBitmap();
-                    controller.addNote(new Note(titleEditText.getText().toString(), date, fileName, imagePath, true));
-                } else {
-                    controller.addNote(new Note(titleEditText.getText().toString(), date, fileName, false));
-                }
+                controller.addNote(new Note(title, date, fileName, false));
             }
         }
     }
 
     private void loadFile() {
-        if (!verifyStoragePermissions(this)) {
-            Toast.makeText(this, "Spróbuj ponownie", Toast.LENGTH_LONG).show();
-        } else {
-            try {
-                FileInputStream fIn = openFileInput(note.getNotePath());
-                InputStreamReader inStreamReader = new InputStreamReader(fIn);
-                BufferedReader bufReader = new BufferedReader(inStreamReader);
-                StringBuilder sb = new StringBuilder();
-                String line;
+        try {
+            FileInputStream fIn = openFileInput(note.getNotePath());
+            InputStreamReader inStreamReader = new InputStreamReader(fIn);
+            BufferedReader bufReader = new BufferedReader(inStreamReader);
+            StringBuilder sb = new StringBuilder();
+            String line;
 
-                while ((line = bufReader.readLine()) != null) {
-                    sb.append(line).append("\n");
-                }
-                dataEditText.setText(sb.toString());
-
-                bufReader.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            while ((line = bufReader.readLine()) != null) {
+                sb.append(line).append("\n");
             }
-            titleEditText.setText(note.getTitle());
-            dateTextView.setText(note.getNoteDate());
-            dateTextView.setVisibility(View.VISIBLE);
+            dataEditText.setText(sb.toString());
+
+            bufReader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        titleEditText.setText(note.getTitle());
+        dateTextView.setText(note.getNoteDate());
+        dateTextView.setVisibility(View.VISIBLE);
+
     }
 
 
@@ -196,16 +192,16 @@ public class NoteActivity extends AppCompatActivity {
         params.setMargins(10, 0, 10, 0);
 
         Button addPhoto = new Button(this);
-        addPhoto.setText("Dodaj zdjęcie");
-        addPhoto.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-        addPhoto.setTextColor(getResources().getColor(R.color.colorWhite));
+        addPhoto.setText(R.string.addPhoto);
+        addPhoto.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
+        addPhoto.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
         addPhoto.setLayoutParams(params);
         addPhoto.setBackgroundResource(R.drawable.tags_rounded_corners);
 
         final Button makePhoto = new Button(this);
-        makePhoto.setText("Zrób zdjęcie");
-        makePhoto.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-        makePhoto.setTextColor(getResources().getColor(R.color.colorWhite));
+        makePhoto.setText(R.string.makePhoto);
+        makePhoto.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorAccent));
+        makePhoto.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.colorWhite));
         makePhoto.setLayoutParams(params);
         makePhoto.setBackgroundResource(R.drawable.tags_rounded_corners);
 
@@ -260,14 +256,17 @@ public class NoteActivity extends AppCompatActivity {
             }
         }
         if (imageView.getDrawable() != null) {
+            if (noteId != 0) {
+                note.setHaveImage(true);
+            }
             imageLayout.removeAllViews();
             imageLayout.addView(imageView);
         }
     }
 
     private void makePhoto() {
-        if (!verifyCameraPermissions(this) || !verifyStoragePermissions(this)) {
-            Toast.makeText(this, "Spróbuj ponownie", Toast.LENGTH_LONG).show();
+        if (!verifyCameraPermissions(this)) {
+            Toast.makeText(this, R.string.tryAgain, Toast.LENGTH_LONG).show();
         } else {
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             if (intent.resolveActivity(getPackageManager()) != null) {
@@ -277,15 +276,10 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     private void getPhoto() {
-        if (!verifyStoragePermissions(this)) {
-            Toast.makeText(this, "Spróbuj ponownie", Toast.LENGTH_LONG).show();
-
-        } else {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Wybierz zdjęcie"), GALLERY_REQUEST);
-        }
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, getString(R.string.selectPhoto)), GALLERY_REQUEST);
     }
 
     private int convertDpToPixel(int dp) {
@@ -295,8 +289,8 @@ public class NoteActivity extends AppCompatActivity {
 
     private void showDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Potwierdź");
-        builder.setMessage("Czy jesteś pewny, że chcesz usunąć dodane zdjęcie?");
+        builder.setTitle(R.string.confirm);
+        builder.setMessage(R.string.deleteImageConfirm);
         builder.setPositiveButton("Tak", new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
@@ -317,6 +311,9 @@ public class NoteActivity extends AppCompatActivity {
 
     private void deleteImage() {
         imageLayout.removeAllViews();
+        if (noteId != 0) {
+            note.setHaveImage(false);
+        }
         createButtonsForImages();
     }
 
@@ -326,23 +323,6 @@ public class NoteActivity extends AppCompatActivity {
         boolean d0 = f0.delete();
     }
 
-
-    private static boolean verifyStoragePermissions(Activity activity) {
-        // Check if we have write permission
-        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    activity,
-                    PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE
-
-            );
-            return false;
-        }
-        return true;
-    }
 
     private boolean verifyCameraPermissions(Activity activity) {
         // Check if we have write permission

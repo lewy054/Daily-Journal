@@ -54,7 +54,7 @@ class DBController extends SQLiteOpenHelper {
         content.put("noteDate", note.getNoteDate());
         content.put("notePath", note.getNotePath());
         content.put("haveImage", note.isHaveImage());
-        if(note.isHaveImage()) {
+        if (note.isHaveImage()) {
             content.put("imagePath", getBitmapAsByteArray(note.getImagePath()));
         }
         db.insertOrThrow("note", null, content);
@@ -78,20 +78,20 @@ class DBController extends SQLiteOpenHelper {
         return students;
     }
 
-     Note selectNote(int id) {
+    Note selectNote(int id) {
         Note note = new Note();
         SQLiteDatabase db = getReadableDatabase();
-        String[] columns={"idNote","title", "noteDate", "notePath", "haveImage", "imagePath"};
-        String[] args ={id+""};
-        Cursor cursor=db.query("note",columns," idNote=?",args,null,null,null,null);
-        if(cursor!=null){
+        String[] columns = {"idNote", "title", "noteDate", "notePath", "haveImage", "imagePath"};
+        String[] args = {id + ""};
+        Cursor cursor = db.query("note", columns, " idNote=?", args, null, null, null, null);
+        if (cursor != null) {
             cursor.moveToFirst();
             note.setNoteId(cursor.getInt(0));
             note.setTitle(cursor.getString(1));
             note.setNoteDate(cursor.getString(2));
             note.setNotePath(cursor.getString(3));
             note.setHaveImage(cursor.getInt(4) > 0);
-            if(cursor.getInt(4) > 0) {
+            if (cursor.getInt(4) > 0) {
                 byte[] image = cursor.getBlob(5);
                 note.setImagePath(BitmapFactory.decodeByteArray(image, 0, image.length));
             }
@@ -100,38 +100,28 @@ class DBController extends SQLiteOpenHelper {
         return note;
     }
 
-    void updateNote(int noteId, String title, String date, String notePath, Boolean isHaveImage) {
+    void updateNote(Note note) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues content = new ContentValues();
-        content.put("title", title);
-        content.put("noteDate", date);
-        content.put("notePath",notePath);
-        content.put("haveImage", isHaveImage);
-        content.put("imagePath", (byte[]) null);
-
-        String[] args = {noteId + ""};
+        content.put("title", note.getTitle());
+        content.put("noteDate", note.getNoteDate());
+        content.put("notePath", note.getNotePath());
+        content.put("haveImage", note.isHaveImage());
+        if (note.isHaveImage()) {
+            content.put("imagePath", getBitmapAsByteArray(note.getImagePath()));
+        } else {
+            content.put("imagePath", (byte[]) null);
+        }
+        String[] args = {note.getNoteId() + ""};
         db.update("note", content, "idNote=?", args);
 
     }
 
-    void updateNote(int noteId, String title, String date, String notePath, Boolean isHaveImage, Bitmap imagePath) {
-        SQLiteDatabase db = getWritableDatabase();
-        ContentValues content = new ContentValues();
-        content.put("title", title);
-        content.put("noteDate", date);
-        content.put("notePath",notePath);
-        content.put("haveImage", isHaveImage);
-        content.put("imagePath", getBitmapAsByteArray(imagePath));
-        String[] args = {noteId + ""};
-        db.update("note", content, "idNote=?", args);
-
-    }
-
-     void removeNote(Note note) {
+    void removeNote(Note note) {
         SQLiteDatabase db = getWritableDatabase();
         String table = "note";
         String whereClause = "idNote=?";
-        String[] whereArgs = new String[] { String.valueOf(note.getNoteId()) };
+        String[] whereArgs = new String[]{String.valueOf(note.getNoteId())};
         db.delete(table, whereClause, whereArgs);
     }
 
@@ -140,8 +130,6 @@ class DBController extends SQLiteOpenHelper {
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
         return outputStream.toByteArray();
     }
-
-
 
 
 }

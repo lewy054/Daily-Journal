@@ -2,20 +2,19 @@ package com.example.dailyjournal;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.widget.CompoundButtonCompat;
 
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.AbsoluteSizeSpan;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.CheckBox;
@@ -44,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     public static int noteId;
     private final ArrayList<CheckBox> checkBoxes = new ArrayList<>();
     private final ArrayList<Note> notesToDelete = new ArrayList<>();
-    FloatingActionButton floatingActionButton;
+    private FloatingActionButton floatingActionButton;
 
 
     @Override
@@ -164,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
         checkBox.setLayoutParams(params);
         checkBox.setVisibility(View.GONE);
         checkBox.setChecked(true);
-        CompoundButtonCompat.setButtonTintList(checkBox, ColorStateList.valueOf(getResources().getColor(R.color.colorGray)));
+        CompoundButtonCompat.setButtonTintList(checkBox, ColorStateList.valueOf(ContextCompat.getColor(getApplicationContext(), R.color.colorGray)));
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
             @Override
@@ -202,8 +201,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void showDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Potwierdź");
-        builder.setMessage("Czy jesteś pewny, że chcesz usunąć zaznaczone notatki?");
+        builder.setTitle(R.string.confirm);
+        builder.setMessage(R.string.deleteNotesConfirm);
         builder.setPositiveButton("Tak", new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
@@ -234,12 +233,12 @@ public class MainActivity extends AppCompatActivity {
             controller.removeNote(note);
         }
         floatingActionButton.setImageResource(R.drawable.ic_add_black);
-        Toast.makeText(this, "Wpisy usunięte", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.notesDeleted, Toast.LENGTH_SHORT).show();
         checkCount = 0;
         onRestart();
     }
 
-    public String loadFile(String notePath) {
+    private String loadFile(String notePath) {
         String line = "";
         try {
             FileInputStream fIn = openFileInput(notePath);

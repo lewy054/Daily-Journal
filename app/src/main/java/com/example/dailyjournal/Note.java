@@ -2,7 +2,7 @@ package com.example.dailyjournal;
 
 import android.graphics.Bitmap;
 
-public class Note {
+class Note {
     private Integer NoteId;
     private String Title;
     private String NoteDate;
