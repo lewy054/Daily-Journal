@@ -10,10 +10,10 @@ class Note {
     private Bitmap ImagePath;
     private boolean HaveImage;
 
-    public Note() {
+    Note() {
     }
 
-    public Note(String title, String noteDate, String notePath, Bitmap imagePath, boolean haveImage) {
+    Note(String title, String noteDate, String notePath, Bitmap imagePath, boolean haveImage) {
         Title = title;
         NoteDate = noteDate;
         NotePath = notePath;
@@ -21,58 +21,58 @@ class Note {
         HaveImage = haveImage;
     }
 
-    public Note(String title, String noteDate, String notePath, boolean haveImage) {
+    Note(String title, String noteDate, String notePath, boolean haveImage) {
         Title = title;
         NoteDate = noteDate;
         NotePath = notePath;
         HaveImage = haveImage;
     }
 
-    public Integer getNoteId() {
+    Integer getNoteId() {
         return NoteId;
     }
 
-    public void setNoteId(Integer noteId) {
+    void setNoteId(Integer noteId) {
         NoteId = noteId;
     }
 
-    public String getTitle() {
+    String getTitle() {
         return Title;
     }
 
-    public void setTitle(String title) {
+    void setTitle(String title) {
         Title = title;
     }
 
-    public String getNoteDate() {
+    String getNoteDate() {
         return NoteDate;
     }
 
-    public void setNoteDate(String noteDate) {
+    void setNoteDate(String noteDate) {
         NoteDate = noteDate;
     }
 
-    public String getNotePath() {
+    String getNotePath() {
         return NotePath;
     }
 
-    public void setNotePath(String notePath) {
+    void setNotePath(String notePath) {
         NotePath = notePath;
     }
 
-    public Bitmap getImagePath() {
+    Bitmap getImagePath() {
         return ImagePath;
     }
 
-    public void setImagePath(Bitmap imagePath) {
+    void setImagePath(Bitmap imagePath) {
         ImagePath = imagePath;
     }
 
-    public boolean isHaveImage() {
+    boolean isHaveImage() {
         return HaveImage;
     }
 
-    public void setHaveImage(boolean haveImage) {
+    void setHaveImage(boolean haveImage) {
         HaveImage = haveImage;
     }
 }

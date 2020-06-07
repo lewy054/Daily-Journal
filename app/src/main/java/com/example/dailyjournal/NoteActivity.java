@@ -103,6 +103,7 @@ public class NoteActivity extends AppCompatActivity {
         String date;
         if(title.equals("") || title.equals(null)){
             Toast.makeText(this, R.string.emptyTitle, Toast.LENGTH_LONG).show();
+            return;
         }
         if (noteId != 0) {
             date = note.getNoteDate();
@@ -119,7 +120,6 @@ public class NoteActivity extends AppCompatActivity {
         fileName = fileName.replaceAll(" ", "_").toLowerCase();
         fileName = fileName + ".txt";
 
-        //String dirName = Environment.getExternalStorageDirectory() + "/" + R.string.app_name + "/";
         String dirName = Environment.getExternalStorageDirectory() + "/DailyJournal/";
         File myDir = new File(dirName);
         /*if directory doesn't exist, create it*/

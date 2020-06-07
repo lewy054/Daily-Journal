@@ -92,8 +92,6 @@ public class MainActivity extends AppCompatActivity {
         int titleSize = 24;
         int dataSize = 17;
         int dateSize = 13;
-
-
         String title = note.getTitle();
         String data = loadFile(note.getNotePath());
         String date = note.getNoteDate();
